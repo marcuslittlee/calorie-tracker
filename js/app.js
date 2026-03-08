@@ -252,6 +252,9 @@ function removeFood(foodId) {
     renderTodayTab();
 }
 
+// make available globally for inline onclick
+window.removeFood = removeFood;
+
 function renderHistoryTab() {
     const historyDays = tracker.getHistoryDays();
     const historyList = document.getElementById('historyList');
@@ -310,6 +313,9 @@ function toggleDayDetails(date) {
     `).join('');
 }
 
+// expose functions for inline onclick attributes (module scope isn't global)
+window.toggleDayDetails = toggleDayDetails;
+
 function renderStatisticsTab() {
     const weeklyStats = tracker.getWeeklyStats();
     const averages = tracker.getWeeklyAverages();
@@ -337,6 +343,79 @@ function renderStatisticsTab() {
     // Draw chart
     drawChart(weeklyStats);
 }
+
+function renderSettingsTab() {
+    const container = document.getElementById('settingsContainer');
+    const settings = tracker.initializeSettings() || {};
+    container.innerHTML = `
+        <h3>Profile & Goals</h3>
+        <form id="settingsForm">
+            <div class="form-group">
+                <label>Weight (kg)</label>
+                <input type="number" id="setWeight" value="${settings.weight||''}" required min="20" max="300" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Height (cm)</label>
+                <input type="number" id="setHeight" value="${settings.height||''}" required min="100" max="250">
+            </div>
+            <div class="form-group">
+                <label>Age</label>
+                <input type="number" id="setAge" value="${settings.age||''}" required min="13" max="120">
+            </div>
+            <div class="form-group">
+                <label>Gender</label>
+                <select id="setGender" required>
+                    <option value="">Select gender</option>
+                    <option value="male" ${settings.gender==='male'? 'selected':''}>Male</option>
+                    <option value="female" ${settings.gender==='female'? 'selected':''}>Female</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Goal</label>
+                <div class="goal-options">
+                    <div class="goal-option">
+                        <input type="radio" id="set_goal_maintain" name="set_goal" value="maintain" ${settings.goal==='maintain'?'checked':''}>
+                        <label for="set_goal_maintain">Maintain Weight</label>
+                    </div>
+                    <div class="goal-option">
+                        <input type="radio" id="set_goal_lose" name="set_goal" value="lose" ${settings.goal==='lose'?'checked':''}>
+                        <label for="set_goal_lose">Lose Weight</label>
+                    </div>
+                    <div class="goal-option">
+                        <input type="radio" id="set_goal_gain" name="set_goal" value="gain" ${settings.goal==='gain'?'checked':''}>
+                        <label for="set_goal_gain">Gain Weight</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Daily Calorie Goal (kcal)</label>
+                <input type="number" id="setDailyGoal" value="${settings.dailyCalorieGoal||''}" min="0" step="1">
+            </div>
+            <div class="onboarding-buttons">
+                <button type="submit" class="btn-primary">Save Settings</button>
+            </div>
+        </form>
+        <div id="settingsMessage" class="settings-message"></div>
+    `;
+
+    const form = document.getElementById('settingsForm');
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const weight = parseFloat(document.getElementById('setWeight').value);
+        const height = parseFloat(document.getElementById('setHeight').value);
+        const age = parseInt(document.getElementById('setAge').value, 10);
+        const gender = document.getElementById('setGender').value;
+        const goal = document.querySelector('input[name="set_goal"]:checked').value;
+        const manualGoal = parseInt(document.getElementById('setDailyGoal').value, 10) || null;
+        tracker.setUserSettings(weight, height, age, gender, goal, manualGoal);
+        const msg = document.getElementById('settingsMessage');
+        msg.textContent = 'Settings saved!';
+        // refresh today tab data and display
+        renderTodayTab();
+        Utils.updateDateDisplay();
+    });
+}
+
 
 function drawChart(stats) {
     const canvas = document.getElementById('caloriesChart');
@@ -405,6 +484,8 @@ function setupTabNavigation() {
                 renderHistoryTab();
             } else if (tabName === 'statisticsTab') {
                 renderStatisticsTab();
+            } else if (tabName === 'settingsTab') {
+                renderSettingsTab();
             }
         });
     });

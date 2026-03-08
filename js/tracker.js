@@ -19,8 +19,16 @@ const tracker = {
     },
 
     // Save user settings
-    setUserSettings(weight, height, age, gender, goal) {
-        const dailyCalorieGoal = calculateDailyCalories(weight, height, age, gender, goal);
+    // weight, height, age, gender, goal: maintain/lose/gain
+    // manualGoal: optional integer to override calculated goal
+    setUserSettings(weight, height, age, gender, goal, manualGoal = null) {
+        let dailyCalorieGoal;
+        if (manualGoal && !isNaN(manualGoal)) {
+            // ensure integer
+            dailyCalorieGoal = Math.round(manualGoal);
+        } else {
+            dailyCalorieGoal = calculateDailyCalories(weight, height, age, gender, goal);
+        }
         this.userSettings = {
             weight,
             height,
@@ -33,6 +41,7 @@ const tracker = {
         localStorage.setItem(USER_SETTINGS_KEY, JSON.stringify(this.userSettings));
         return this.userSettings;
     },
+
 
     // Get daily calorie goal
     getDailyCalorieGoal() {
