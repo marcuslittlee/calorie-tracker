@@ -51,7 +51,7 @@ const tracker = {
         return this.userSettings?.dailyCalorieGoal || 2500; // default fallback
     },
 
-    addFoodToday(grams) {
+    addFoodToday(grams, meal = 'Snacks') {
         if (!this.currentFood || grams < 1) return;
 
         const today = getTodayDate();
@@ -62,7 +62,8 @@ const tracker = {
             calories: this._calculateCalories(this.currentFood.calories, grams),
             protein: parseFloat(((this.currentFood.protein / 100) * grams).toFixed(2)),
             carbs: parseFloat(((this.currentFood.carbs / 100) * grams).toFixed(2)),
-            fat: parseFloat(((this.currentFood.fat / 100) * grams).toFixed(2))
+            fat: parseFloat(((this.currentFood.fat / 100) * grams).toFixed(2)),
+            meal: meal
         };
 
         const data = this._loadData();
@@ -87,6 +88,36 @@ const tracker = {
         const today = getTodayDate();
         const data = this._loadData();
         return data[today] || [];
+    },
+
+    getTodayFoodsByMeal() {
+        const foods = this.getTodayFoods();
+        const meals = {
+            'Breakfast': [],
+            'Lunch': [],
+            'Dinner': [],
+            'Snacks': []
+        };
+
+        foods.forEach(food => {
+            const meal = food.meal || 'Snacks';
+            if (meals[meal]) {
+                meals[meal].push(food);
+            } else {
+                meals.Snacks.push(food);
+            }
+        });
+
+        return meals;
+    },
+
+    getMealTotals(mealFoods) {
+        return mealFoods.reduce((totals, food) => ({
+            calories: totals.calories + food.calories,
+            protein: totals.protein + food.protein,
+            carbs: totals.carbs + food.carbs,
+            fat: totals.fat + food.fat
+        }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
     },
 
     getTodayTotals() {

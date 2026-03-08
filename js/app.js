@@ -117,17 +117,18 @@ function setupEventListeners() {
     // Add food button
     addFoodBtn.addEventListener('click', () => {
         const gramsValue = parseInt(grams.value);
+        const mealValue = document.getElementById('mealCategory').value;
         if (tracker.currentFood && gramsValue > 0) {
-            console.log('Adding food:', tracker.currentFood.name, gramsValue, 'grams');
-            tracker.addFoodToday(gramsValue);
-            
+            console.log('Adding food:', tracker.currentFood.name, gramsValue, 'grams to', mealValue);
+            tracker.addFoodToday(gramsValue, mealValue);
+
             // Clear inputs
             foodSearch.value = '';
             selectedFood.value = '';
             grams.value = '';
             searchResults.classList.add('hidden');
             currentSearchResults = [];
-            
+
             renderTodayTab();
             validateAddButton();
         } else {
@@ -213,38 +214,62 @@ function renderTodayTab() {
 
     // Update calorie progress bar
     document.getElementById('progressBar').style.width = progressPercent + '%';
-    document.getElementById('caloriesCurrent').textContent = Utils.formatCalories(totals.calories) + ' kcal';
-    document.getElementById('caloriesRemaining').textContent = 'Goal: ' + Utils.formatCalories(dailyGoal) + ' kcal';
-    document.getElementById('calorieTarget').textContent = Utils.formatCalories(remaining) + ' remaining';
+    document.getElementById('caloriesCurrent').textContent = Utils.formatCalories(totals.calories);
+    document.getElementById('caloriesRemaining').textContent = Utils.formatCalories(remaining) + ' remaining';
 
-    // Update macros
-    document.getElementById('proteinValue').textContent = Utils.formatMacro(totals.protein);
-    document.getElementById('carbsValue').textContent = Utils.formatMacro(totals.carbs);
-    document.getElementById('fatValue').textContent = Utils.formatMacro(totals.fat);
+    // Update macros with progress bars
+    const proteinPercent = Math.min(100, (totals.protein / 150) * 100); // Assuming 150g protein goal
+    const carbsPercent = Math.min(100, (totals.carbs / 300) * 100); // Assuming 300g carbs goal
+    const fatPercent = Math.min(100, (totals.fat / 67) * 100); // Assuming 67g fat goal (30% of 2000 cal)
 
-    // Update foods list
-    const foodsList = document.getElementById('foodsList');
-    
-    if (foods.length === 0) {
-        foodsList.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">🍽️</div>
-                <p>No foods logged yet. Start by searching for a food!</p>
+    document.getElementById('proteinValue').textContent = Utils.formatMacro(totals.protein) + 'g';
+    document.getElementById('proteinBar').style.width = proteinPercent + '%';
+
+    document.getElementById('carbsValue').textContent = Utils.formatMacro(totals.carbs) + 'g';
+    document.getElementById('carbsBar').style.width = carbsPercent + '%';
+
+    document.getElementById('fatValue').textContent = Utils.formatMacro(totals.fat) + 'g';
+    document.getElementById('fatBar').style.width = fatPercent + '%';
+
+    // Update meals section
+    const mealsByType = tracker.getTodayFoodsByMeal();
+    const mealsGrid = document.getElementById('mealsGrid');
+
+    const mealIcons = {
+        'Breakfast': '🌅',
+        'Lunch': '☀️',
+        'Dinner': '🌙',
+        'Snacks': '🍪'
+    };
+
+    const mealOrder = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
+
+    mealsGrid.innerHTML = mealOrder.map(mealType => {
+        const mealFoods = mealsByType[mealType] || [];
+        const mealTotals = tracker.getMealTotals(mealFoods);
+
+        const foodItems = mealFoods.map(food => `
+            <div class="meal-food-item">
+                <div class="meal-food-name">${food.name}</div>
+                <div class="meal-food-macros">${food.grams}g | P: ${Utils.formatMacro(food.protein)}g | C: ${Utils.formatMacro(food.carbs)}g | F: ${Utils.formatMacro(food.fat)}g</div>
+                <div class="meal-food-calories">${Utils.formatCalories(food.calories)}</div>
+                <button class="delete-btn" onclick="removeFood(${food.id})">×</button>
+            </div>
+        `).join('');
+
+        return `
+            <div class="meal-card">
+                <div class="meal-header">
+                    <div class="meal-icon">${mealIcons[mealType]}</div>
+                    <div class="meal-name">${mealType}</div>
+                    <div class="meal-calories">${Utils.formatCalories(mealTotals.calories)} kcal</div>
+                </div>
+                <div class="meal-foods">
+                    ${mealFoods.length > 0 ? foodItems : '<div class="empty-state"><p>No foods logged yet</p></div>'}
+                </div>
             </div>
         `;
-        return;
-    }
-
-    foodsList.innerHTML = foods.map(food => `
-        <div class="food-item">
-            <div class="food-info">
-                <div class="food-name">${food.name}</div>
-                <div class="food-macros">${food.grams}g | P: ${Utils.formatMacro(food.protein)}g | C: ${Utils.formatMacro(food.carbs)}g | F: ${Utils.formatMacro(food.fat)}g</div>
-            </div>
-            <div class="food-calories">${Utils.formatCalories(food.calories)}</div>
-            <button class="delete-btn" onclick="removeFood(${food.id})">Delete</button>
-        </div>
-    `).join('');
+    }).join('');
 }
 
 function removeFood(foodId) {

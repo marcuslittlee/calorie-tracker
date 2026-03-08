@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calorie Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -78,79 +81,115 @@
         <main class="main-content">
             <!-- Today Tab -->
             <section id="todayTab" class="tab-content active">
-                <!-- Calorie Progress -->
-                <div class="calorie-progress-card">
-                    <div class="calorie-header">
-                        <span class="calorie-label">Daily Calories</span>
-                        <span class="calorie-target" id="calorieTarget"></span>
-                    </div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar" id="progressBar"></div>
+                <!-- Calorie Progress Card -->
+                <div class="card calorie-card">
+                    <div class="card-header">
+                        <h2>Daily Calories</h2>
                     </div>
                     <div class="calorie-display">
-                        <div class="calorie-current" id="caloriesCurrent">0 kcal</div>
-                        <div class="calorie-remaining" id="caloriesRemaining">Goal: 2500 kcal</div>
+                        <div class="calorie-main">
+                            <span class="calorie-current" id="caloriesCurrent">0</span>
+                            <span class="calorie-unit">kcal</span>
+                        </div>
+                        <div class="calorie-remaining" id="caloriesRemaining">2500 remaining</div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progressBar"></div>
                     </div>
                 </div>
 
-                <!-- Macros Container -->
-                <div class="macros-container">
-                    <div class="macro-card">
-                        <div class="macro-icon">🥩</div>
-                        <div class="macro-name">Protein</div>
-                        <div class="macro-value"><span id="proteinValue">0</span><span class="macro-unit">g</span></div>
+                <!-- Macros Card -->
+                <div class="card macros-card">
+                    <div class="card-header">
+                        <h2>Macros</h2>
                     </div>
-                    <div class="macro-card">
-                        <div class="macro-icon">🍞</div>
-                        <div class="macro-name">Carbs</div>
-                        <div class="macro-value"><span id="carbsValue">0</span><span class="macro-unit">g</span></div>
-                    </div>
-                    <div class="macro-card">
-                        <div class="macro-icon">🥑</div>
-                        <div class="macro-name">Fat</div>
-                        <div class="macro-value"><span id="fatValue">0</span><span class="macro-unit">g</span></div>
+                    <div class="macros-grid">
+                        <div class="macro-item">
+                            <div class="macro-header">
+                                <span class="macro-icon">🥩</span>
+                                <span class="macro-name">Protein</span>
+                            </div>
+                            <div class="macro-value" id="proteinValue">0g</div>
+                            <div class="macro-progress">
+                                <div class="macro-bar" id="proteinBar"></div>
+                            </div>
+                        </div>
+                        <div class="macro-item">
+                            <div class="macro-header">
+                                <span class="macro-icon">🍞</span>
+                                <span class="macro-name">Carbs</span>
+                            </div>
+                            <div class="macro-value" id="carbsValue">0g</div>
+                            <div class="macro-progress">
+                                <div class="macro-bar" id="carbsBar"></div>
+                            </div>
+                        </div>
+                        <div class="macro-item">
+                            <div class="macro-header">
+                                <span class="macro-icon">🥑</span>
+                                <span class="macro-name">Fat</span>
+                            </div>
+                            <div class="macro-value" id="fatValue">0g</div>
+                            <div class="macro-progress">
+                                <div class="macro-bar" id="fatBar"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Search and Input -->
-                <div class="search-container">
-                    <input 
-                        type="text" 
-                        id="foodSearch" 
-                        placeholder="🔍 Search for a food..." 
-                        class="search-input"
-                        autocomplete="off"
-                    >
-                    <div id="searchResults" class="search-results hidden"></div>
-                </div>
-
-                <div class="input-section">
-                    <div class="input-group">
+                <!-- Food Search Card -->
+                <div class="card search-card">
+                    <div class="card-header">
+                        <h2>Add Food</h2>
+                    </div>
+                    <div class="search-container">
                         <input 
                             type="text" 
-                            id="selectedFood" 
-                            placeholder="Selected food" 
-                            readonly 
-                            class="food-input"
+                            id="foodSearch" 
+                            placeholder="🔍 Search for a food..." 
+                            class="search-input"
+                            autocomplete="off"
                         >
-                        <button id="clearFood" class="clear-btn">✕</button>
+                        <div id="searchResults" class="search-results hidden"></div>
                     </div>
-                    <div class="input-group">
-                        <input 
-                            type="number" 
-                            id="grams" 
-                            placeholder="Grams" 
-                            class="grams-input"
-                            min="1"
-                        >
-                        <button id="addFoodBtn" class="add-btn">+ Add Food</button>
+                    <div class="add-food-form">
+                        <div class="form-row">
+                            <select id="mealCategory" class="meal-select">
+                                <option value="Breakfast">Breakfast</option>
+                                <option value="Lunch">Lunch</option>
+                                <option value="Dinner">Dinner</option>
+                                <option value="Snacks" selected>Snacks</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <input 
+                                type="text" 
+                                id="selectedFood" 
+                                placeholder="Selected food" 
+                                readonly 
+                                class="food-input"
+                            >
+                            <button id="clearFood" class="clear-btn">✕</button>
+                        </div>
+                        <div class="form-row">
+                            <input 
+                                type="number" 
+                                id="grams" 
+                                placeholder="Grams" 
+                                class="grams-input"
+                                min="1"
+                            >
+                            <button id="addFoodBtn" class="add-btn">+ Add Food</button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Foods List -->
-                <div class="foods-list">
-                    <h3>Today's Log</h3>
-                    <div id="foodsList" class="foods-container"></div>
+                <!-- Today's Meals -->
+                <div class="meals-section">
+                    <h2>Today's Meals</h2>
+                    <div id="mealsGrid" class="meals-grid">
+                        <!-- Meals will be populated by JavaScript -->
+                    </div>
                 </div>
             </section>
 
