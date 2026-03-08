@@ -215,7 +215,7 @@ function renderTodayTab() {
     document.getElementById('progressBar').style.width = progressPercent + '%';
     document.getElementById('caloriesCurrent').textContent = Utils.formatCalories(totals.calories) + ' kcal';
     document.getElementById('caloriesRemaining').textContent = 'Goal: ' + Utils.formatCalories(dailyGoal) + ' kcal';
-    document.getElementById('calorieTarget').textContent = remaining + ' remaining';
+    document.getElementById('calorieTarget').textContent = Utils.formatCalories(remaining) + ' remaining';
 
     // Update macros
     document.getElementById('proteinValue').textContent = Utils.formatMacro(totals.protein);
@@ -291,10 +291,17 @@ function renderHistoryTab() {
                     <div class="history-stat-value">${Utils.formatMacro(day.totals.fat)}g</div>
                 </div>
             </div>
-            <button class="expand-btn" onclick="toggleDayDetails('${day.date}')">View Foods</button>
+            <button class="expand-btn" data-date="${day.date}">View Foods</button>
         </div>
         <div id="details-${day.date}" class="history-details hidden"></div>
     `).join('');
+    // attach event listeners after DOM insertion
+    historyList.querySelectorAll('.expand-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const date = btn.dataset.date;
+            toggleDayDetails(date);
+        });
+    });
 }
 
 function toggleDayDetails(date) {
@@ -349,18 +356,19 @@ function renderSettingsTab() {
     const settings = tracker.initializeSettings() || {};
     container.innerHTML = `
         <h3>Profile & Goals</h3>
+        <p>Enter your personal information and daily calorie goal. You can adjust these later as your needs change.</p>
         <form id="settingsForm">
             <div class="form-group">
                 <label>Weight (kg)</label>
-                <input type="number" id="setWeight" value="${settings.weight||''}" required min="20" max="300" step="0.1">
+                <input type="number" id="setWeight" value="${settings.weight||''}" required min="20" max="300" step="0.1" placeholder="e.g. 75">
             </div>
             <div class="form-group">
                 <label>Height (cm)</label>
-                <input type="number" id="setHeight" value="${settings.height||''}" required min="100" max="250">
+                <input type="number" id="setHeight" value="${settings.height||''}" required min="100" max="250" placeholder="e.g. 180">
             </div>
             <div class="form-group">
                 <label>Age</label>
-                <input type="number" id="setAge" value="${settings.age||''}" required min="13" max="120">
+                <input type="number" id="setAge" value="${settings.age||''}" required min="13" max="120" placeholder="e.g. 30">
             </div>
             <div class="form-group">
                 <label>Gender</label>
@@ -389,7 +397,7 @@ function renderSettingsTab() {
             </div>
             <div class="form-group">
                 <label>Daily Calorie Goal (kcal)</label>
-                <input type="number" id="setDailyGoal" value="${settings.dailyCalorieGoal||''}" min="0" step="1">
+                <input type="number" id="setDailyGoal" value="${settings.dailyCalorieGoal||''}" min="0" step="1" placeholder="e.g. 2000">
             </div>
             <div class="onboarding-buttons">
                 <button type="submit" class="btn-primary">Save Settings</button>
